@@ -13,11 +13,11 @@ class App extends Component {
     super(props);
     this.state = {
       data: [
-        { name: 'Ivan', salary: 800, increase: false, id: 1 },
-        { name: 'Tamara', salary: 9000, increase: true, id: 2 },
-        { name: 'Carl', salary: 100, increase: false, id: 3 },
-        { name: 'Foncato', salary: 293, increase: false, id: 4 },
-        { name: 'Yecun', salary: 928, increase: true, id: 5 },
+        { name: 'Ivan', salary: 800, increase: false, rise: false, id: 1 },
+        { name: 'Tamara', salary: 9000, increase: true, rise: false, id: 2 },
+        { name: 'Carl', salary: 100, increase: false, rise: true, id: 3 },
+        { name: 'Foncato', salary: 293, increase: false, rise: false, id: 4 },
+        { name: 'Yecun', salary: 928, increase: true, rise: false, id: 5 },
       ],
     };
     this.maxId = this.state.data.length;
@@ -29,13 +29,13 @@ class App extends Component {
 
       // data должен быть иммутабелен, то есть не должен изменяться
 
-      // 1 способ - разбить массив на 2 половинке за исключением искомого элемента
+      // TODO 1 способ - разбить массив на 2 половинке за исключением искомого элемента
       // const index = data.findIndex(item => item.id === id);
       // const before = data.slice(0, index);
       // const after = data.slice(index + 1);
       // const newData = [...before, ...after];
 
-      // 2 способ - фильтр - можно сразу писать в return без дополнительной переменной
+      // TODO 2 способ - фильтр - можно сразу писать в return без дополнительной переменной
       const newData = data.filter((item) => item.id !== id);
 
       return {
@@ -45,34 +45,80 @@ class App extends Component {
   };
 
   addItem = (name, salary) => {
-    const newItem = {
-      name,
-      salary,
-      increase: false,
-      id: ++this.maxId,
-    };
-    this.setState(({ data }) => {
-      const newArr = [...data, newItem];
-      return {
-        data: newArr,
+    if (name && salary) {
+      const newItem = {
+        name,
+        salary,
+        increase: false,
+        rise: false,
+        id: ++this.maxId,
       };
-    });
+      this.setState(({ data }) => {
+        const newArr = [...data, newItem];
+        return {
+          data: newArr,
+        };
+      });
+    } else {
+      console.warn('Введите данные нового сотрудника');
+    }
+  };
+
+  // onToggleIncrease = (id) => {
+  //   // TODO: 1 способ
+  //   this.setState(({ data }) => {
+  //     const index = data.findIndex(item => item.id === id);
+  //     const oldItem = data[index];
+  //     const newItem = { ...oldItem, increase: !oldItem.increase };
+  //     const newArr = [...data.slice(0, index), newItem, ...data.slice(index + 1)];
+
+  //     return {
+  //       data: newArr,
+  //     };
+  //   });
+
+  //   // TODO: 2 способ
+  //   this.setState(({ data }) => ({
+  //     data: data.map((item) => {
+  //       if (item.id === id) {
+  //         return { ...item, increase: !item.increase };
+  //       }
+  //       return item;
+  //     }),
+  //   }));
+  // };
+
+  // объединение обработчиков для rise и increase в один метод
+  onToggleProp = (id, prop) => {
+    this.setState(({ data }) => ({
+      data: data.map((item) => {
+        if (item.id === id) {
+          return { ...item, [prop]: !item[prop] };
+        }
+        return item;
+      }),
+    }));
   };
 
   render() {
     const { data } = this.state;
+    const awardEmployeesAmount = data.filter((item) => item.increase === true).length;
 
     return (
       <div className="app">
-        <AppInfo />
+        <AppInfo employeesAmount={data.length} awardEmployeesAmount={awardEmployeesAmount} />
 
         <div className="search-panel">
           <SearchPanel />
           <AppFilter />
         </div>
 
-        <EmployeesList data={data} onDelete={this.deleteItem} />
-        <EmployeesAddForm onAdd={this.addItem}/>
+        <EmployeesList
+          data={data}
+          onDelete={this.deleteItem}
+          onToggleProp={this.onToggleProp}
+        />
+        <EmployeesAddForm onAdd={this.addItem} />
       </div>
     );
   }
