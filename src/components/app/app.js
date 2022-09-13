@@ -103,6 +103,22 @@ class App extends Component {
     }));
   };
 
+  onChangeSalary = (id, value, element) => {
+    this.setState(({ data }) => ({
+      data: data.map((item) => {
+        if (item.id === id) {
+          if (value > 2000) {
+            element.classList.add('warning');
+          } else {
+            element.classList.remove('warning');
+          }
+          return { ...item, salary: value };
+        }
+        return item;
+      }),
+    }));
+  };
+
   searchEmp = (items, term) => {
     if (term.length === 0) {
       return items;
@@ -143,10 +159,15 @@ class App extends Component {
 
         <div className="search-panel">
           <SearchPanel onUpdateSearch={this.onUpdateSearch} />
-          <AppFilter filter={filter} onFilterSelect={this.onFilterSelect}/>
+          <AppFilter filter={filter} onFilterSelect={this.onFilterSelect} />
         </div>
 
-        <EmployeesList data={visibleData} onDelete={this.deleteItem} onToggleProp={this.onToggleProp} />
+        <EmployeesList
+          data={visibleData}
+          onDelete={this.deleteItem}
+          onToggleProp={this.onToggleProp}
+          onChangeSalary={this.onChangeSalary}
+        />
         <EmployeesAddForm onAdd={this.addItem} />
       </div>
     );
